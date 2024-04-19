@@ -61,3 +61,23 @@ delete_files_with_extensions <- function(folder_path) {
     print("No files with .png or .svg extension found in the folder.")
   }
 }
+
+prepare_prices <- function(df) {
+  df$Dates <- as.Date(paste("01", df$Dates), format = "%d %b %Y")
+  df$VCR_EDM_Diff <- df$Vancouver - df$Edmonton
+  colnames(df)[which(colnames(df) == "Dates")] <- "Date"
+  return(df)
+}
+
+prepare_tolls <- function(df) {
+  df <- subset(df, select = -c(Tariff.Number,
+                               Replaces.Tariff.Number,
+                               REGDOCS.Folder,
+                               REGDOCS.Download.Link,
+                               Corporate.Entity,
+                               Pipeline.Name))
+  df <- df |> filter(Service == "Tank Metered", Unit == "CN$/m3")
+  df <- subset(df, select = -c(Service, Unit))
+  df$Date <- as.Date(df$Date, "%Y-%m-%d")
+  return(df)
+}
