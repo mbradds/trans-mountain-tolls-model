@@ -11,6 +11,17 @@ prepare_model_data <- function(df_tolls, df_price, product="light", path="Edmont
     filter(Product == product) |>
     filter(Path == path) |>
     inner_join(df_price, by = "Date")
+  
+  df <- df |>
+    mutate(lag_toll_1 = lag(Toll, n = 1, default = NA))
+  
+  df$toll_change <- df$Toll - df$lag_toll_1
+  
+  df <- df |>
+    mutate(lead_toll_change = lead(toll_change, n = 1, default = NA))
+  
+  df <- df |>
+    mutate(lag_toll_change = lag(toll_change, n = 1, default = NA))
   return(df)
 }
 
@@ -46,6 +57,7 @@ tolls_data <- get_data("trans-mountain-tolls.csv")
 tolls_data <- prepare_tolls(tolls_data)
 # print(str(tolls_data))
 
+# data for model and charts
 df <- prepare_model_data(tolls_data, price_data)
 
 # charts
@@ -53,20 +65,9 @@ chart_tolls_by_path(tolls_data)
 chart_scatter(df)
 
 # model
-df <- df |>
-  mutate(lag_toll_1 = lag(Toll, n = 1, default = NA))
-  
-df$toll_change <- df$Toll - df$lag_toll_1
-
-df <- df |>
-  mutate(lead_toll_change = lead(toll_change, n = 1, default = NA))
-
-df <- df |>
-  mutate(lag_toll_change = lag(toll_change, n = 1, default = NA))
-
-model <- lm(VCR_EDM_Diff ~ toll_change + lead_toll_change + lag_toll_change + Toll,  data = df)
+model <- lm(VCR_EDM_Diff ~ lead_toll_change + Toll,  data = df)
 # Print the model summary
 summary(model)
 # Perform Durbin-Watson test for autocorrelation in residuals
 dwtest(model)
-
+plot(model, which = 1)
