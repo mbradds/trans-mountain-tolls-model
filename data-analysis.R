@@ -46,6 +46,11 @@ chart_scatter <- function(df, product="light", path="Edmonton to Burnaby") {
   save_charts("2_scatter", chart)
 }
 
+prepare_throughputs <- function(df) {
+  
+  return(df)
+}
+
 
 # gasoline prices
 price_data <- get_data("Edmonton and Vancouver Unleaded Wholesale Prices from.csv")
@@ -56,6 +61,10 @@ price_data = prepare_prices(price_data)
 tolls_data <- get_data("trans-mountain-tolls.csv")
 tolls_data <- prepare_tolls(tolls_data)
 # print(str(tolls_data))
+
+# throughput data
+traffic_data <- get_data("trans-mountain-throughput-and-capacity.csv")
+traffic_data <- prepare_throughputs(traffic_data)
 
 # data for model and charts
 df <- prepare_model_data(tolls_data, price_data)
